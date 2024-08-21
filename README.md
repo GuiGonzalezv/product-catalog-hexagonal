@@ -26,8 +26,8 @@ Antes de iniciar, certifique-se de ter as seguintes ferramentas instaladas:
 
  3. Agora acesse a URL:
     
- ```bash
- [http](http://localhost:5000/swagger/index.html)
-    
-# 
-By: Guilherme Gonzalez
+    ```bash
+    [http](http://localhost:5000/swagger/index.html)
+
+
+# By: Guilherme Gonzalez
