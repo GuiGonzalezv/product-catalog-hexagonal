@@ -9,6 +9,8 @@ COPY ProductCatalog.Domain/*.csproj ./ProductCatalog.Domain/
 COPY ProductCatalog/*.csproj ./ProductCatalog/
 COPY ProductCatalog.Infra.Mongo/*.csproj ./ProductCatalog.Infra.Mongo/
 COPY ProductCatalog.Infra.Mapper/*.csproj ./ProductCatalog.Infra.Mapper/
+COPY ProductCatalog.Infra.ExternalApis/*.csproj ./ProductCatalog.Infra.ExternalApis/
+COPY ProductCatalog.Tests/*.csproj ./ProductCatalog.Tests/
 
 RUN dotnet restore --force-evaluate
 
