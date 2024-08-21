@@ -23,6 +23,11 @@ Antes de iniciar, certifique-se de ter as seguintes ferramentas instaladas:
     
     ```bash
     docker-compose up
+
+ 3. Agora acesse a URL:
+    
+ ```bash
+ [http](http://localhost:5000/swagger/index.html)
     
 # 
 By: Guilherme Gonzalez
