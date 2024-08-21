@@ -1,6 +1,6 @@
-﻿using AutoMapper;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using ProductCatalog.Domain.Entities;
+using ProductCatalog.Domain.Ports;
 using ProductCatalog.Domain.Ports.Supplier;
 using ProductCatalog.Infra.Mongo.DataModel;
 

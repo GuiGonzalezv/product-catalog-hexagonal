@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using ProductCatalog.Application.Services;
 using ProductCatalog.Application.Services.Product.Base;
 using ProductCatalog.Application.Services.Product.Validations;
 using ProductCatalog.Domain.Entities;
@@ -25,10 +26,17 @@ namespace ProductCatalog.Controllers
         }
 
         [HttpGet(Name = "Get")]
-        public async Task<IEnumerable<ProductResponse>> Get()
+        public async Task<IActionResult> Get([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
         {
-            var products = await _productService.GetProducts();
-            return _mapper.Map<IEnumerable<ProductResponse>>(products);
+            var (products, totalCount) = await _productService.GetProducts(pageNumber, pageSize);
+            var productResponse = _mapper.Map<IEnumerable<ProductResponse>>(products);
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                var response = new PageResponse<ProductResponse>(productResponse, totalCount, pageNumber.Value, pageSize.Value);
+                return Ok(response);
+            }
+
+            return Ok(productResponse);
         }
 
         [HttpGet("{id}", Name = "GetById")]
@@ -48,7 +56,7 @@ namespace ProductCatalog.Controllers
         }
 
         [HttpPut(Name = "Update")]
-        public async Task<OkResult> Update(UpdateProductRequest request)
+        public async Task<IActionResult> Update(UpdateProductRequest request)
         {
             var product = _mapper.Map<ProductModel>(request);
             await _productService.Update(product);
@@ -56,7 +64,7 @@ namespace ProductCatalog.Controllers
         }
 
         [HttpDelete("{id}", Name = "DeleteById")]
-        public async Task<OkResult> DeleteById(string id)
+        public async Task<IActionResult> DeleteById(string id)
         {
             await _productService.Disable(id);
             return Ok();

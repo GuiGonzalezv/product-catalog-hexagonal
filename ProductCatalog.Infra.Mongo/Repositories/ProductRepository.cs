@@ -15,10 +15,29 @@ public class ProductRepository : IProductRepository
         _mapper = mapper;
     }
 
-    public async Task<IEnumerable<ProductModel>> GetAllAsync()
+    public async Task<(IEnumerable<ProductModel>, int TotalCount)> GetAllAsync(int? pageNumber, int? pageSize)
     {
-        var products = await _products.Find(product => product.isActive).ToListAsync();
-        return _mapper.Map<IEnumerable<ProductModel>>(products);
+        int skip = 0;
+        int limit = int.MaxValue;
+
+        if (pageNumber.HasValue && pageSize.HasValue)
+        {
+            skip = (pageNumber.Value - 1) * pageSize.Value;
+            limit = pageSize.Value;
+        }
+
+        var productsQuery = _products.Find(product => product.isActive);
+
+        var totalCount = await productsQuery.CountDocumentsAsync();
+
+        var products = await productsQuery
+            .Skip(skip)
+            .Limit(limit)
+            .ToListAsync();
+
+        var result = _mapper.Map<IEnumerable<ProductModel>>(products);
+
+        return (result, (int)totalCount);
     }
 
     public async Task<ProductModel> GetByIdAsync(string id)

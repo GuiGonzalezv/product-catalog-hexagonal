@@ -27,10 +27,10 @@ namespace ProductCatalog.Application.Services.Product
             return await _repository.GetByIdAsync(id);
         }
 
-        public async Task<IEnumerable<ProductModel>> GetProducts()
+        public async Task<(IEnumerable<ProductModel>, int TotalCount)> GetProducts(int? pageNumber, int? pageSize)
         {
-            return await _repository.GetAllAsync();
-        }
+            return await _repository.GetAllAsync(pageNumber, pageSize);
+        }   
 
         public async Task Update(ProductModel product)
         {
