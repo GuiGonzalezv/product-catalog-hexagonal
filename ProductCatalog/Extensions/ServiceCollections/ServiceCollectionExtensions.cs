@@ -10,7 +10,6 @@
             services.AddSwaggerGen();
             services.AddMapper();
             services.AddMongoDB(configuration);
-            services.AddValidation();
             services.AddCors(c => c.AddPolicy("AllowOrigin", builder =>
             {
                 builder.AllowAnyOrigin()

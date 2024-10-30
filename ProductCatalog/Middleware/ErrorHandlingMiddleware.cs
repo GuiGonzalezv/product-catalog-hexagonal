@@ -24,14 +24,14 @@ namespace ProductCatalog.Middleware
             }
             catch (Exception ex)
             {
-                _log.LogError(ex, "An unhandled exception occurred.");
+                _log.LogError(ex, ex.Message);
                 await HandleExceptionAsync(context, ex);
             }
         }
 
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            var errorResponse = JsonSerializer.Serialize(new { message = exception?.Message });
+            var errorResponse = JsonSerializer.Serialize(new { message = "Ocorreu um erro inesperado na API."});
             context.Response.ContentType = MediaTypeNames.Application.Json;
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             return context.Response.WriteAsync(errorResponse);

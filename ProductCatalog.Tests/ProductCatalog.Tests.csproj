@@ -18,9 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ProductCatalog.Application\ProductCatalog.Application.csproj" />
     <ProjectReference Include="..\ProductCatalog.Domain\ProductCatalog.Domain.csproj" />
     <ProjectReference Include="..\ProductCatalog.Infra.ExternalApis\ProductCatalog.Infra.ExternalApis.csproj" />
+    <ProjectReference Include="..\ProductCatalog.Infra.FluentValidation\ProductCatalog.Infra.FluentValidation.csproj" />
     <ProjectReference Include="..\ProductCatalog.Infra.Mapper\ProductCatalog.Infra.Mapper.csproj" />
     <ProjectReference Include="..\ProductCatalog.Infra.Mongo\ProductCatalog.Infra.Mongo.csproj" />
     <ProjectReference Include="..\ProductCatalog\ProductCatalog.csproj" />

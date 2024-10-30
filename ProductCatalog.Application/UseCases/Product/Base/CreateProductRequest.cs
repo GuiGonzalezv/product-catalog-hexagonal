@@ -1,8 +1,9 @@
-﻿namespace ProductCatalog.Application.Services.Product.Base
+﻿using ProductCatalog.Domain.Dtos.Product;
+
+namespace ProductCatalog.Application.UseCases.Product.Base
 {
-    public class ProductResponse
+    public class CreateProductRequest : ICreateProductRequest
     {
-        public string? Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; }

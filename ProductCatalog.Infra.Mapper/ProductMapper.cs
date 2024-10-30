@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using ProductCatalog.Application.Services.Product.Base;
+using ProductCatalog.Application.UseCases.Product.Base;
 using ProductCatalog.Domain.Entities;
 using ProductCatalog.Infra.Mongo.DataModel;
 

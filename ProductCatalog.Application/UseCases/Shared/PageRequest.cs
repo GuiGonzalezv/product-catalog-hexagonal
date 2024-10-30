@@ -1,4 +1,4 @@
-﻿namespace ProductCatalog.Application.Services
+﻿namespace ProductCatalog.Application.UseCases.Shared
 {
     public class PageRequest
     {

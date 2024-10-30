@@ -1,18 +1,25 @@
 ﻿using Moq;
 using ProductCatalog.Domain.Entities;
+using ProductCatalog.Domain.Ports;
 using ProductCatalog.Domain.Ports.Supplier;
-using ProductCatalog.Application.Services.Supplier;
+using ProductCatalog.Domain.UseCases;
+using ProductCatalog.Domain.UseCases.Supplier;
+using ProductCatalog.Interfaces;
 using Xunit;
 
 public class SupplierServiceTests
 {
     private readonly Mock<ISupplierRepository> _supplierRepositoryMock;
+    private readonly Mock<IPresenter> _outputPortMock;
+    private readonly Mock<IMapper> _mapper;
     private readonly SupplierService _supplierService;
 
     public SupplierServiceTests()
     {
         _supplierRepositoryMock = new Mock<ISupplierRepository>();
-        _supplierService = new SupplierService(_supplierRepositoryMock.Object);
+        _outputPortMock = new Mock<IPresenter>();
+        _mapper = new Mock<IMapper>();
+        _supplierService = new SupplierService(_supplierRepositoryMock.Object, _mapper.Object, _outputPortMock.Object);
     }
 
     [Fact]
@@ -23,11 +30,16 @@ public class SupplierServiceTests
         _supplierRepositoryMock.Setup(repo => repo.CreateAsync(supplier)).ReturnsAsync(supplier);
 
         // Act
-        var result = await _supplierService.CreateSupplierAsync(supplier);
+        await _supplierService.CreateSupplierAsync(supplier);
 
         // Assert
+        var response = new UseCaseOutput<SupplierModel>(supplier);
+
         _supplierRepositoryMock.Verify(repo => repo.CreateAsync(supplier), Times.Once);
-        Assert.Equal(supplier, result);
+
+        _outputPortMock.Verify(p => p.Handle(It.Is<UseCaseOutput<SupplierModel>>(output =>
+             output.HasErrors == false && output.Data == supplier)),
+             Times.Once);
     }
 
     [Fact]
@@ -42,11 +54,13 @@ public class SupplierServiceTests
         _supplierRepositoryMock.Setup(repo => repo.GetAllAsync()).ReturnsAsync(suppliers);
 
         // Act
-        var result = await _supplierService.GetSuppliersAsync();
+        await _supplierService.GetSuppliersAsync();
 
         // Assert
         _supplierRepositoryMock.Verify(repo => repo.GetAllAsync(), Times.Once);
-        Assert.Equal(suppliers, result);
+        _outputPortMock.Verify(p => p.Handle(It.Is<UseCaseOutput<IEnumerable<SupplierModel>>>(output =>
+                     output.HasErrors == false && output.Data == suppliers)),
+                     Times.Once);
     }
 
     [Fact]
@@ -59,24 +73,33 @@ public class SupplierServiceTests
         _supplierRepositoryMock.Setup(repo => repo.ExistsAsync(supplierId)).ReturnsAsync(true);
 
         // Act
-        var result = await _supplierService.GetSupplierByIdAsync(supplierId);
+        await _supplierService.GetSupplierByIdAsync(supplierId);
 
         // Assert
         _supplierRepositoryMock.Verify(repo => repo.GetByIdAsync(supplierId), Times.Once);
-        Assert.Equal(supplier, result);
+
+        _outputPortMock.Verify(p => p.Handle(It.Is<UseCaseOutput<SupplierModel>>(output =>
+                     output.HasErrors == false && output.Data == supplier)),
+                     Times.Once);
     }
 
     [Fact]
-    public async Task GetSupplierByIdAsync_ShouldThrowNotFoundException_WhenSupplierDoesNotExist()
+    public async Task GetSupplierByIdAsync_ShouldHandleError_WhenSupplierDoesNotExist()
     {
         // Arrange
         var supplierId = "1";
         var supplier = new SupplierModel { Id = supplierId };
+
         _supplierRepositoryMock.Setup(repo => repo.GetByIdAsync(supplierId)).ReturnsAsync(supplier);
         _supplierRepositoryMock.Setup(repo => repo.ExistsAsync(supplierId)).ReturnsAsync(false);
 
         // Act & Assert
-        await Assert.ThrowsAsync<NotFoundException>(() => _supplierService.GetSupplierByIdAsync(supplierId));
+        await _supplierService.GetSupplierByIdAsync(supplierId);
+
+        _outputPortMock.Verify(p => p.Handle(It.Is<UseCaseOutput<ErrorResponse>>(output =>
+             output.HasErrors == true &&
+             output.Errors.Any(error => error.Message == "O fornecedor não foi encontrado."))),
+             Times.Once);
     }
 
     [Fact]
@@ -111,13 +134,16 @@ public class SupplierServiceTests
     }
 
     [Fact]
-    public async Task VerifySupplierExist_ShouldThrowNotFoundException_WhenSupplierDoesNotExist()
+    public async Task VerifySupplierExist_ShouldReturnFalse_WhenSupplierDoesNotExist()
     {
-        // Arrange
         var supplierId = "invalidSupplier";
         _supplierRepositoryMock.Setup(repo => repo.ExistsAsync(supplierId)).ReturnsAsync(false);
 
-        // Act & Assert
-        await Assert.ThrowsAsync<NotFoundException>(() => _supplierService.VerifySupplierExist(supplierId));
+        var response = await _supplierService.VerifySupplierExist(supplierId);
+
+        _outputPortMock.Verify(p => p.Handle(It.Is<UseCaseOutput<ErrorResponse>>(output =>
+             output.HasErrors == true &&
+             output.Errors.Any(error => error.Message == "O fornecedor não foi encontrado."))),
+             Times.Once);
     }
 }

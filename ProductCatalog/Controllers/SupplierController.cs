@@ -1,20 +1,25 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ProductCatalog.Application.Services.Supplier.Base;
 using ProductCatalog.Domain.Entities;
 using ProductCatalog.Domain.Ports.Supplier;
-using AutoMapper;
+using ProductCatalog.Domain.Ports;
+using System.Net;
+using ProductCatalog.Application.UseCases.Supplier.Base;
+
 
 namespace ProductCatalog.Controllers
 {
     [ApiController]
     [Route("/api/suppliers")]
-    public class SupplierController : ControllerBase
+    public class SupplierController : BaseController
     {
         private readonly ILogger<SupplierController> _logger;
         private readonly ISupplierService _supplierService;
         private readonly IMapper _mapper;
 
-        public SupplierController(ILogger<SupplierController> logger, ISupplierService supplierService, IMapper mapper)
+        public SupplierController(ILogger<SupplierController> logger,
+            ISupplierService supplierService,
+            IMapper mapper,
+            Interfaces.IPresenter presenter) : base(presenter)
         {
             _logger = logger;
             _supplierService = supplierService;
@@ -22,25 +27,25 @@ namespace ProductCatalog.Controllers
         }
 
         [HttpGet(Name = "GetSuppliers")]
-        public async Task<IEnumerable<SupplierResponse>> GetSuppliers()
+        public async Task<IActionResult> GetSuppliers()
         {
-            var suppliers = await _supplierService.GetSuppliersAsync();
-            return _mapper.Map<IEnumerable<SupplierResponse>>(suppliers);
+            await _supplierService.GetSuppliersAsync();
+            return ResultForGet();
         }
 
         [HttpGet("{id}", Name = "GetSupplierById")]
-        public async Task<SupplierResponse> GetSupplierById(string id)
+        public async Task<IActionResult> GetSupplierById(string id)
         {
-            var supplier = await _supplierService.GetSupplierByIdAsync(id);
-            return _mapper.Map<SupplierResponse>(supplier);
+            await _supplierService.GetSupplierByIdAsync(id);
+            return ResultForGet();
         }
 
         [HttpPost(Name = "InsertSupplier")]
-        public async Task<SupplierResponse> InsertSupplier(CreateSupplierRequest request)
+        public async Task<IActionResult> InsertSupplier(CreateSupplierRequest request)
         {
             var supplier = _mapper.Map<SupplierModel>(request);
-            var response = await _supplierService.CreateSupplierAsync(supplier);
-            return _mapper.Map<SupplierResponse>(response);
+            await _supplierService.CreateSupplierAsync(supplier);
+            return ResultForPost(HttpStatusCode.Created);
         }
 
         [HttpPut(Name = "UpdateSupplier")]
@@ -48,14 +53,14 @@ namespace ProductCatalog.Controllers
         {
             var supplier = _mapper.Map<SupplierModel>(request);
             await _supplierService.UpdateSupplierAsync(supplier);
-            return Ok();
+            return ResultForPut(HttpStatusCode.OK);
         }
 
         [HttpDelete("{id}", Name = "DeleteSupplierById")]
         public async Task<IActionResult> DeleteSupplierById(string id)
         {
             await _supplierService.DeleteSupplierAsync(id);
-            return Ok();
+            return ResultForDelete(HttpStatusCode.OK);
         }
     }
 }

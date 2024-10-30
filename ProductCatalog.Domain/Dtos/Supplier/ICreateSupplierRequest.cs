@@ -1,6 +1,6 @@
-﻿namespace ProductCatalog.Application.Services.Supplier.Base
-{
-    public class CreateSupplierRequest
+﻿namespace ProductCatalog.Domain.Dtos.Supplier
+{ 
+    public interface ICreateSupplierRequest
     {
         public string Name { get; set; }
         public string ContactEmail { get; set; }

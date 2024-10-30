@@ -1,34 +1,42 @@
 ﻿using ProductCatalog.Domain.Entities;
+using ProductCatalog.Domain.Ports;
 using ProductCatalog.Domain.Ports.Supplier;
 
-
-namespace ProductCatalog.Application.Services.Supplier
+namespace ProductCatalog.Application.UseCases.Supplier
 {
-    public class SupplierService : ISupplierService
+    public class SupplierService : UseCaseBase, ISupplierService
     {
         private readonly ISupplierRepository _supplierRepository;
+        private readonly IMapper _mapper;
+        private readonly IOutputPort _outputPort;
 
-        public SupplierService(ISupplierRepository supplierRepository)
+        public SupplierService(
+            ISupplierRepository supplierRepository,
+            IMapper mapper,
+            IOutputPort outputPort) : base(outputPort, mapper)
         {
             _supplierRepository = supplierRepository;
+            _mapper = mapper;
+            _outputPort = outputPort;
         }
 
-        public async Task<SupplierModel> CreateSupplierAsync(SupplierModel supplier)
+        public async Task CreateSupplierAsync(SupplierModel supplier)
         {
             var response = await _supplierRepository.CreateAsync(supplier);
-            return response;
+            Handle(response);
         }
 
-        public async Task<IEnumerable<SupplierModel>> GetSuppliersAsync()
+        public async Task GetSuppliersAsync()
         {
-            return await _supplierRepository.GetAllAsync();
+            var response = await _supplierRepository.GetAllAsync();
+            Handle(response);
         }
 
-        public async Task<SupplierModel> GetSupplierByIdAsync(string id)
+        public async Task GetSupplierByIdAsync(string id)
         {
             var supplier = await _supplierRepository.GetByIdAsync(id);
-            await VerifySupplierExist(supplier.Id);
-            return supplier;
+            if (!await VerifySupplierExist(supplier.Id)) return;
+            Handle(supplier);
         }
 
         public async Task UpdateSupplierAsync(SupplierModel supplierModel)
@@ -45,12 +53,14 @@ namespace ProductCatalog.Application.Services.Supplier
             await _supplierRepository.DeleteAsync(id);
         }
 
-        public async Task VerifySupplierExist(string id)
+        public async Task<bool> VerifySupplierExist(string id)
         {
             if (!await _supplierRepository.ExistsAsync(id))
             {
-                throw new NotFoundException("O fornecedor não foi encontrado.");
+                Handle<ErrorResponse>("O fornecedor não foi encontrado.");
+                return false;
             }
+            return true;
         }
     }
 

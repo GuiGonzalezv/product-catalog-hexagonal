@@ -1,24 +1,23 @@
-using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using ProductCatalog.Application.Services;
-using ProductCatalog.Application.Services.Product.Base;
-using ProductCatalog.Application.Services.Product.Validations;
-using ProductCatalog.Domain.Entities;
+using ProductCatalog.Application.UseCases.Product.Base;
 using ProductCatalog.Domain.Ports;
 using ProductCatalog.Domain.Ports.Product;
-using System.ComponentModel.DataAnnotations;
+using System.Net;
 
 namespace ProductCatalog.Controllers
 {
     [ApiController]
     [Route("/api/products")]
-    public class ProductController : ControllerBase
+    public class ProductController : BaseController
     {
         private readonly ILogger<ProductController> _logger;
         private readonly IProductService _productService;
         private readonly IMapper _mapper;
 
-        public ProductController(ILogger<ProductController> logger, IProductService productService, IMapper mapper)
+        public ProductController(ILogger<ProductController> logger,
+            IProductService productService,
+            IMapper mapper,
+            Interfaces.IPresenter presenter) : base(presenter)
         {
             _logger = logger;
             _productService = productService;
@@ -28,46 +27,36 @@ namespace ProductCatalog.Controllers
         [HttpGet(Name = "Get")]
         public async Task<IActionResult> Get([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
         {
-            var (products, totalCount) = await _productService.GetProducts(pageNumber, pageSize);
-            var productResponse = _mapper.Map<IEnumerable<ProductResponse>>(products);
-            if (pageNumber.HasValue && pageSize.HasValue)
-            {
-                var response = new PageResponse<ProductResponse>(productResponse, totalCount, pageNumber.Value, pageSize.Value);
-                return Ok(response);
-            }
-
-            return Ok(productResponse);
+            await _productService.GetProducts(pageNumber, pageSize);
+            return ResultForGet();
         }
 
         [HttpGet("{id}", Name = "GetById")]
-        public async Task<ProductResponse> GetById(string id)
+        public async Task<IActionResult> GetById(string id)
         {
-            var product = await _productService.GetById(id);
-            return _mapper.Map<ProductResponse>(product);
+            await _productService.GetById(id);
+            return ResultForGet();
         }
 
         [HttpPost(Name = "Insert")]
-        public async Task<ProductResponse> Insert(CreateProductRequest request)
+        public async Task<IActionResult> Insert(CreateProductRequest request)
         {
-            var product = _mapper.Map<ProductModel>(request);
-            var response = await _productService.Create(product);
-            return _mapper.Map<ProductResponse>(response);
-
+            await _productService.Create(request);
+            return ResultForPost(HttpStatusCode.Created);
         }
 
         [HttpPut(Name = "Update")]
         public async Task<IActionResult> Update(UpdateProductRequest request)
         {
-            var product = _mapper.Map<ProductModel>(request);
-            await _productService.Update(product);
-            return Ok();
+            await _productService.Update(request);
+            return ResultForPut(HttpStatusCode.OK);
         }
 
         [HttpDelete("{id}", Name = "DeleteById")]
         public async Task<IActionResult> DeleteById(string id)
         {
             await _productService.Disable(id);
-            return Ok();
+            return ResultForPut(HttpStatusCode.OK);
         }
     }
 }

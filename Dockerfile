@@ -2,17 +2,19 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-# Copia os arquivos de projeto e restaura as dependências
+# Copia os arquivos de solução e projetos para restaurar as dependências
 COPY *.sln ./
-COPY ProductCatalog.Application/*.csproj ./ProductCatalog.Application/
 COPY ProductCatalog.Domain/*.csproj ./ProductCatalog.Domain/
+COPY ProductCatalog.Application/*.csproj ./ProductCatalog.Application/
 COPY ProductCatalog/*.csproj ./ProductCatalog/
 COPY ProductCatalog.Infra.Mongo/*.csproj ./ProductCatalog.Infra.Mongo/
 COPY ProductCatalog.Infra.Mapper/*.csproj ./ProductCatalog.Infra.Mapper/
 COPY ProductCatalog.Infra.ExternalApis/*.csproj ./ProductCatalog.Infra.ExternalApis/
+COPY ProductCatalog.Infra.FluentValidation/*.csproj ./ProductCatalog.Infra.FluentValidation/
 COPY ProductCatalog.Tests/*.csproj ./ProductCatalog.Tests/
 
-RUN dotnet restore --force-evaluate
+# Restaura as dependências
+RUN dotnet restore
 
 # Copia o restante dos arquivos do projeto
 COPY . .

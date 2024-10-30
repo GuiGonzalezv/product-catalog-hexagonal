@@ -1,16 +1,16 @@
-﻿using ProductCatalog.Domain.Entities;
+﻿using ProductCatalog.Domain.Dtos.Product;
 
 namespace ProductCatalog.Domain.Ports.Product
 {
     public interface IProductService
     {
-        Task<(IEnumerable<ProductModel>, int TotalCount)> GetProducts(int? pageNumber, int? pageSize);
+        Task GetProducts(int? pageNumber, int? pageSize);
 
-        Task<ProductModel> GetById(string id);
+        Task GetById(string id);
 
-        Task<ProductModel> Create(ProductModel product);
+        Task Create(ICreateProductRequest request);
 
-        Task Update(ProductModel product);
+        Task Update(IUpdateProductRequest product);
 
         Task Disable(string id);
     }

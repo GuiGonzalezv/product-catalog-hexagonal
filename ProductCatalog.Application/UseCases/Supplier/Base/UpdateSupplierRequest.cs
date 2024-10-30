@@ -1,4 +1,4 @@
-﻿namespace ProductCatalog.Application.Services.Supplier.Base
+﻿namespace ProductCatalog.Application.UseCases.Supplier.Base
 {
     public class UpdateSupplierRequest : CreateSupplierRequest
     {
